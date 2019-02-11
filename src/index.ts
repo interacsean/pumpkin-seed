@@ -1,7 +1,6 @@
 import './infrastructure/env';
-import Server from './app';
-import routes from './api/routes';
+import Server from './infrastructure/bootstrap';
 
 const port = parseInt(process.env.PORT);
 
-Server(routes, port);
+Server(port);

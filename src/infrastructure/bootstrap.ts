@@ -1,12 +1,13 @@
 import express, { Application } from 'express';
 import path from 'path';
 import bodyParser from 'body-parser';
+import routeCreator from '../api/routes';
 import http from 'http';
 import cookieParser from 'cookie-parser';
-import swaggerify from './infrastructure/swagger';
-import l from './infrastructure/logger';
+import swaggerify from './swagger';
+import l from './logger';
 
-export default function(routes: (app: Application) => void, port: string | number) {
+export default function(port: string | number) {
   const app = express();
 
   const root = path.normalize(__dirname + '/../..');
@@ -17,7 +18,7 @@ export default function(routes: (app: Application) => void, port: string | numbe
   app.use(express.static(`${root}/public`));
 
   // todo: put in swagger bootstrap
-  swaggerify(app, routes);
+  swaggerify(app, routeCreator);
 
   const welcome = port => () => l.info(`up and running in ${process.env.NODE_ENV || 'development'} on port: ${port}}`);
   http.createServer(app).listen(port, welcome(port));
