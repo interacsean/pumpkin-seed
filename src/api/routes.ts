@@ -3,6 +3,7 @@ import fs from 'fs';
 import { join } from 'path';
 import { reportError } from '../services';
 import {RouteDef} from '../infrastructure/types/RouteDef';
+import errorHandler from "./common/errorHandler";
 
 const forEachDirIn = (source: string, cb: (string) => void) => {
   fs.readdirSync(source)
@@ -21,11 +22,16 @@ export default function routes(app: Application): void {
 
       const dirRouter = Router();
       forEachDirIn(join(source, dir), (subdir: string) => {
-        if (fs.existsSync(join(source, dir, subdir, 'route.ts'))) {
-          import(join(source, dir, subdir, 'route.ts'))
+        if (fs.existsSync(join(source, dir, subdir, `${dir}.${subdir}.route.ts`))) {
+          import(join(source, dir, subdir, `${dir}.${subdir}.route.ts`))
             .then(({ default: routeDef }: { default: RouteDef<any, any> }) => {
-              console.log(`Defining route: ${routeDef.method}:${routeDef.path}`);
-              dirRouter[routeDef.method](routeDef.path, routeDef.controller);
+              console.log(`Defining route: ${routeDef.method}:${dir}${routeDef.path}`);
+              //
+              dirRouter[routeDef.method](
+                routeDef.path,
+                ...(Array.isArray(routeDef.middleware) ? routeDef.middleware : []),
+                routeDef.controller,
+              );
             })
             .catch((err) => {
               throw new Error(err);
@@ -34,6 +40,7 @@ export default function routes(app: Application): void {
       });
       // todo: /v1 should be parameterised outside of this
       app.use(`/v1/${dir}`, dirRouter);
+      app.use(errorHandler)
     });
 
   } catch (err) {

@@ -7,7 +7,14 @@ import cookieParser from 'cookie-parser';
 import swaggerify from './swagger';
 import l from './logger';
 
-export default function(port: string | number) {
+type Config = {
+  API_VERSION: string,
+  API_DOMAIN: string,
+  PORT: number,
+  BASE_PATH: string,
+}
+
+export default function(siteConfig: Config) {
   const app = express();
 
   const root = path.normalize(__dirname + '/../..');
@@ -21,5 +28,5 @@ export default function(port: string | number) {
   swaggerify(app, routeCreator);
 
   const welcome = port => () => l.info(`up and running in ${process.env.NODE_ENV || 'development'} on port: ${port}}`);
-  http.createServer(app).listen(port, welcome(port));
+  http.createServer(app).listen(siteConfig.PORT, welcome(siteConfig.PORT));
 }

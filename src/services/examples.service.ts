@@ -1,4 +1,3 @@
-import Promise from 'bluebird';
 import L from '../infrastructure/logger'
 
 let id = 0;

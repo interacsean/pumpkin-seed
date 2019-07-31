@@ -1,6 +1,5 @@
 import './infrastructure/env';
+import SITE from './config/site';
 import Server from './infrastructure/bootstrap';
 
-const port = parseInt(process.env.PORT);
-
-Server(port);
+Server(SITE);
