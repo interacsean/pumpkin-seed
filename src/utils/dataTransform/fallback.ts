@@ -18,10 +18,12 @@ function fallback<Obj, Value>(
   defaultVal: Value,
   obj1: Obj,
 ): Value;
+
 function fallback<Obj, Value>(
   fn: (optimisticObj: Required<Obj>) => Optional<Value>,
   defaultVal: Value,
 ): (obj2: Obj) => Value;
+
 function fallback<Obj, Value>(
   fn: (optimisticObj: Required<Obj>) => Optional<Value>,
   defaultVal: Value,

@@ -2,8 +2,9 @@ import { Application, Router } from 'express';
 import fs from 'fs';
 import { join } from 'path';
 import { reportError } from '../services';
-import {RouteDef} from '../infrastructure/types/RouteDef';
-import errorHandler from "./common/errorHandler";
+import { RouteDef } from '../infrastructure/types/RouteDef';
+import withErrorGuard from '../infrastructure/api/withErrorGuard';
+import site from "../config/site";
 
 const forEachDirIn = (source: string, cb: (string) => void) => {
   fs.readdirSync(source)
@@ -12,9 +13,11 @@ const forEachDirIn = (source: string, cb: (string) => void) => {
 };
 
 export default function routes(app: Application): void {
-  console.log(`Defining routes found under ${__dirname}`);
+  console.log(`Search for routes under \`${__dirname}\``);
   const source = __dirname;
   const excludes: string[] = ['common'];
+
+  const basePath = site.API_VERSION;
 
   try {
     forEachDirIn(source, (dir: string) => {
@@ -25,12 +28,17 @@ export default function routes(app: Application): void {
         if (fs.existsSync(join(source, dir, subdir, `${dir}.${subdir}.route.ts`))) {
           import(join(source, dir, subdir, `${dir}.${subdir}.route.ts`))
             .then(({ default: routeDef }: { default: RouteDef<any, any> }) => {
-              console.log(`Defining route: ${routeDef.method}:${dir}${routeDef.path}`);
+              // todo ensure leading slash is correct:
+              const correctedRoutePath = routeDef.path[0] === '/'
+                ? routeDef.path
+                : `/${routeDef.path}`;
+
+              console.log(`Defining route: ${routeDef.method}:/${basePath}/${dir}${correctedRoutePath}`);
               //
               dirRouter[routeDef.method](
                 routeDef.path,
                 ...(Array.isArray(routeDef.middleware) ? routeDef.middleware : []),
-                routeDef.controller,
+                withErrorGuard(routeDef.controller),
               );
             })
             .catch((err) => {
@@ -38,9 +46,7 @@ export default function routes(app: Application): void {
             });
         }
       });
-      // todo: /v1 should be parameterised outside of this
-      app.use(`/v1/${dir}`, dirRouter);
-      app.use(errorHandler)
+      app.use(`/${basePath}/${dir}`, dirRouter);
     });
 
   } catch (err) {

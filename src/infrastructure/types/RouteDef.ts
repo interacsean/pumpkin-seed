@@ -5,6 +5,6 @@ export type RouteDef<Q, R> = {
   method: 'get' | 'post' | 'put' | 'delete',
   path: string,
   controller: Controller<Q, R>,
-  middleware?: Array<RequestHandler>,
+  middleware?: RequestHandler[],
   weight?: number,
 }

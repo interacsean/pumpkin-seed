@@ -1,3 +1,3 @@
-import { HttpError } from './HttpError';
+import { HttpError } from '../HttpError';
 
 export type Errable<T> = HttpError | T;

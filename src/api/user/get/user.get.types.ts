@@ -1,3 +1,5 @@
+import {Optional} from "../../../types/utility/Optional";
+
 export type Dto = {
-  id: number | null,
+  id: Optional<number>,
 }

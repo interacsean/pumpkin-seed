@@ -1,8 +1,7 @@
 import { Dto } from './user.get.types';
 import { Errable } from '../../../infrastructure/types/Errable';
-import httpError from "../../../utils/api/httpError";
+import httpError from "../../../infrastructure/HttpError";
 
-export default function validate(todoMe: Dto): Errable<Dto> {
-  throw new Error('hi')
-  return !todoMe.id ? httpError('no id', 400) : todoMe;
+export default function validate(dto: Dto): Errable<Dto> {
+  return !dto.id ? httpError('no id', { status: 400 }) : dto;
 }
